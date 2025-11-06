@@ -97,26 +97,7 @@ def main(
     prompter = InteractivePrompter(non_interactive=non_interactive or dry_run)
 
     try:
-        # Step 1: Detect metadata
-        if verbose:
-            prompter.show_info("Detecting project metadata...")
-
-        detector = MetadataDetector(project_dir)
-        metadata = detector.detect_all_metadata()
-
-        # Override with command-line arguments
-        if name:
-            metadata["name"] = name
-        if project_version:
-            metadata["version"] = project_version
-        if python:
-            metadata["requires_python"] = python
-
-        # Confirm metadata in interactive mode
-        if not non_interactive:
-            metadata = prompter.confirm_metadata(metadata)
-
-        # Step 2: Find and parse requirements files
+        # Step 1: Check for requirements files FIRST (fail-fast)
         if verbose:
             prompter.show_info("Finding requirements files...")
 
@@ -135,6 +116,25 @@ def main(
                     "create a requirements.txt file."
                 )
                 sys.exit(1)
+
+        # Step 2: Detect metadata (only if requirements files exist)
+        if verbose:
+            prompter.show_info("Detecting project metadata...")
+
+        detector = MetadataDetector(project_dir)
+        metadata = detector.detect_all_metadata()
+
+        # Override with command-line arguments
+        if name:
+            metadata["name"] = name
+        if project_version:
+            metadata["version"] = project_version
+        if python:
+            metadata["requires_python"] = python
+
+        # Confirm metadata in interactive mode
+        if not non_interactive:
+            metadata = prompter.confirm_metadata(metadata)
 
         # Add explicitly specified dev/test files
         if dev:
@@ -167,7 +167,7 @@ def main(
         # Remove duplicates from warnings
         all_warnings = list(dict.fromkeys(all_warnings))
 
-        # Step 3: Convert to pyproject.toml structure
+        # Step 4: Convert to pyproject.toml structure
         if verbose:
             prompter.show_info("Converting to pyproject.toml format...")
 
@@ -178,7 +178,7 @@ def main(
         all_warnings.extend(converter.get_warnings())
         all_warnings = list(dict.fromkeys(all_warnings))
 
-        # Step 4: Handle existing pyproject.toml
+        # Step 5: Handle existing pyproject.toml
         output_path = project_dir / "pyproject.toml"
         backup_path = None
 
@@ -225,7 +225,7 @@ def main(
             prompter.show_info("Conversion cancelled.")
             sys.exit(0)
 
-        # Step 5: Write pyproject.toml
+        # Step 6: Write pyproject.toml
         if dry_run:
             prompter.show_info("DRY RUN - would write the following to pyproject.toml:")
             toml_content = tomli_w.dumps(pyproject)
@@ -242,7 +242,7 @@ def main(
 
             output_path.write_text(toml_content, encoding="utf-8")
 
-            # Step 6: Validate
+            # Step 7: Validate
             if not no_validate:
                 if verbose:
                     prompter.show_info("Validating pyproject.toml...")
@@ -260,7 +260,7 @@ def main(
                         prompter.show_error(error)
                     sys.exit(1)
 
-            # Step 7: Success!
+            # Step 8: Success!
             prompter.show_success(output_path, backup_path)
 
             # Show next steps

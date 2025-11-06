@@ -2,8 +2,14 @@
 
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 
 class MetadataDetector:
@@ -250,11 +256,59 @@ class MetadataDetector:
 
         return None
 
-    def detect_all_metadata(self) -> dict:
-        """Detect all metadata and return as dictionary."""
-        readme = self.find_readme()
+    def read_existing_pyproject(self) -> dict:
+        """Read metadata from existing pyproject.toml if it exists."""
+        pyproject_path = self.project_dir / "pyproject.toml"
+        if not pyproject_path.exists():
+            return {}
 
-        metadata = {
+        try:
+            with open(pyproject_path, "rb") as f:
+                data = tomllib.load(f)
+                project = data.get("project", {})
+
+                # Extract relevant metadata
+                metadata = {}
+                if project.get("name"):
+                    metadata["name"] = project["name"]
+                if project.get("version"):
+                    metadata["version"] = project["version"]
+                if project.get("description"):
+                    metadata["description"] = project["description"]
+                if project.get("readme"):
+                    metadata["readme"] = project["readme"]
+                if project.get("requires-python"):
+                    metadata["requires_python"] = project["requires-python"]
+                if project.get("authors"):
+                    metadata["authors"] = project["authors"]
+
+                # Extract license
+                if project.get("license"):
+                    license_info = project["license"]
+                    if isinstance(license_info, dict):
+                        metadata["license"] = license_info.get("text") or license_info.get("file")
+                    else:
+                        metadata["license"] = license_info
+
+                return metadata
+
+        except Exception:
+            # If we can't read it, return empty dict
+            return {}
+
+    def detect_all_metadata(self) -> dict:
+        """Detect all metadata and return as dictionary.
+
+        Priority order:
+        1. Existing pyproject.toml (if exists)
+        2. Filesystem detection (for missing fields)
+        """
+        # First, try to read from existing pyproject.toml
+        existing = self.read_existing_pyproject()
+
+        # Detect all metadata from filesystem
+        readme = self.find_readme()
+        detected = {
             "name": self.detect_project_name(),
             "version": self.detect_version(),
             "description": self.detect_description(),
@@ -265,5 +319,8 @@ class MetadataDetector:
             "repository_url": self.get_git_remote_url(),
             "is_git_repo": self.is_git_repo(),
         }
+
+        # Merge: existing takes priority, detected fills in gaps
+        metadata = {**detected, **existing}
 
         return metadata
