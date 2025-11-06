@@ -262,33 +262,33 @@ local-package = { path = "../local", editable = true }
 
 ### Supported Features
 
- Standard PyPI packages
- Version specifiers (`==`, `>=`, `>`, `<`, `<=`, `!=`, `~=`)
- Git URLs (HTTPS)
- Local paths (editable and non-editable)
- Environment markers
- Package extras
- Poetry `^` syntax (with conversion)
- Comments (stripped)
- Line continuations (`\`)
+- ✅ Standard PyPI packages
+- ✅ Version specifiers (`==`, `>=`, `>`, `<`, `<=`, `!=`, `~=`)
+- ✅ Git URLs (HTTPS)
+- ✅ Local paths (editable and non-editable)
+- ✅ Environment markers
+- ✅ Package extras
+- ✅ Poetry `^` syntax (with conversion)
+- ✅ Comments (stripped)
+- ✅ Line continuations (`\`)
 
 ### Unsupported Features (with warnings)
 
-� **Hashes** (`--hash=sha256:...`)
+⚠️ **Hashes** (`--hash=sha256:...`)
 - Not supported in `pyproject.toml`
 - Use `uv.lock` for reproducible installs
 - Warning generated, hashes stripped
 
-� **Index URLs** (`--index-url`, `--extra-index-url`)
+⚠️ **Index URLs** (`--index-url`, `--extra-index-url`)
 - Not stored in `pyproject.toml`
 - Comment added with original URL
 - Configure via `uv` CLI or config
 
-� **VCS other than Git** (`hg+`, `svn+`, `bzr+`)
+⚠️ **VCS other than Git** (`hg+`, `svn+`, `bzr+`)
 - Not supported by `uv`
 - Warning generated, dependency skipped
 
-� **SSH Git URLs**
+⚠️ **SSH Git URLs**
 - Converted to HTTPS if possible (GitHub, GitLab, Bitbucket)
 - Warning generated for unknown hosts
 
@@ -430,7 +430,7 @@ A: Specify the path explicitly: `req2uv --requirements /path/to/requirements.txt
 A: Check warnings in verbose mode: `req2uv --verbose`
 
 **Q: Package names are different from requirements.txt**
-A: PyPI normalizes package names (e.g., `python-dateutil` � `python_dateutil`). This is expected.
+A: PyPI normalizes package names (e.g., `python-dateutil` -> `python_dateutil`). This is expected.
 
 **Q: Git SSH URLs fail to convert**
 A: The tool converts GitHub/GitLab/Bitbucket SSH URLs to HTTPS automatically. For other hosts, manually edit the generated `pyproject.toml`.
