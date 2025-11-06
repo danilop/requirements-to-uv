@@ -1,0 +1,51 @@
+[project]
+name = "requirements-to-uv"
+version = "0.1.0"
+description = "Convert Python projects from requirements.txt to uv-managed pyproject.toml"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "requirements-to-uv contributors" }
+]
+license = { text = "MIT" }
+keywords = ["uv", "requirements", "pyproject", "packaging", "dependency-management"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "packaging>=23.0",
+    "tomli>=2.0.0 ; python_version < '3.11'",
+    "tomli-w>=1.0.0",
+    "questionary>=2.0.0",
+    "rich>=13.0.0",
+    "click>=8.0.0",
+]
+
+[project.scripts]
+req2uv = "requirements_to_uv.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/danilop/requirements-to-uv"
+Repository = "https://github.com/danilop/requirements-to-uv"
+Issues = "https://github.com/danilop/requirements-to-uv/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+    "vulture>=2.14",
+    "bandit>=1.7.10",
+]
